@@ -6,41 +6,101 @@
     <title>Programming Language Trends</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* 🎨 Background Styling */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1fe6cc;
-            color: #010008;
+            background: linear-gradient(120deg, #2c3e50, #34495e);
+            color: white;
+            font-family: 'Poppins', sans-serif;
             text-align: center;
-            margin: 0;
+            margin: 0
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        h1 {
-            font-size: 28px;
-            margin-top: 20px;
-        }
+
+        /* 📊 Chart Container */
         .chart-container {
             width: 80%;
             max-width: 900px;
-            margin: 25px auto;
-            padding: 25px;
-            background: #1a515a;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(247, 246, 246, 0.94);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
         }
+
+        /* 🏷️ Title Styling */
+        h2 {
+            font-size: 26px;
+            margin-bottom: 25px;  /* ⬅️ Added more space */
+        }
+
+        /* 📌 Chart Canvas */
         canvas {
-            display: block;
-            width: 100% !important;
-            height: 500px !important;
+            padding-top: 15px;  /* ⬅️ More space below legend */
         }
     </style>
 </head>
 <body>
-    <h1>Top 10 Programming Languages Over the Years</h1>
     <div class="chart-container">
+        <h2>Top 10 Programming Language Trends Over The Year (2022-2025)</h2>
         <canvas id="myChart"></canvas>
     </div>
 
-    <!-- Load script.js from static folder -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        async function fetchData() {
+            const response = await fetch("/data");
+            const data = await response.json();
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const colors = ['#FF5733', '#FFC300', '#36A2EB', '#4CAF50', '#8E44AD', '#E74C3C', '#2ECC71', '#D35400', '#34495E', '#F39C12'];
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.years,
+                    datasets: data.languages.map((lang, index) => ({
+                        label: lang,
+                        data: data.counts[lang],
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '50',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        fill: false
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { 
+                            position: 'top', 
+                            labels: { color: 'white', padding: 15 }  /* ⬅️ Added padding to space out languages */
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Year', font: { size: 14 }, color: 'white' },
+                            ticks: { color: 'white' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Relative Popularity (%)', font: { size: 14 }, color: 'white' },
+                            ticks: { color: 'white' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        fetchData();
+    </script>
 </body>
 </html>
